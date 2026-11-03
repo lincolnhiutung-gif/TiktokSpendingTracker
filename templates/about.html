@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}About · TikTok Spending Tracker{% endblock %}
+{% block content %}
+<h1>About this project</h1>
+
+<div class="prose">
+  <section class="card">
+    <h2>What it's for</h2>
+    <p>This site tests the hypothesis that young people aged 16 to 24 are influenced by TikTok trends to buy
+      products they wouldn't otherwise have bought. Anyone can add a purchase, browse and filter the data,
+      fix or remove an entry, and see the results as charts.</p>
+  </section>
+
+
+  <section class="card">
+    <h2>Universal Design</h2>
+    <ul>
+      <li>Works on phones, tablets and laptops.</li>
+      <li>Every chart has a text summary and a data table, so the information doesn't rely on seeing the image.</li>
+      <li>High-contrast colours, a dark theme, and clear keyboard focus outlines.</li>
+      <li>A “Skip to main content” link and proper headings for screen readers and keyboard users.</li>
+      <li>No JavaScript is needed, so the site works on older devices and with scripts turned off.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>How it's built</h2>
+    <p>Python with Flask serves the pages, SQLite stores the data in three linked tables (respondents,
+      purchases and categories), and Matplotlib draws the charts.</p>
+  </section>
+</div>
+{% endblock %}

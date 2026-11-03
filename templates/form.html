@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit entry" if mode == "edit" else "Add entry" }} · TikTok Spending Tracker{% endblock %}
+{% block content %}
+<h1>{{ "Edit entry #" ~ purchase_id if mode == "edit" else "Add a purchase" }}</h1>
+<p class="lead">Tell us about something you bought because of TikTok. We don't ask for your name or any contact details.</p>
+
+<form class="card entry-form" method="post"
+      action="{{ url_for('edit', purchase_id=purchase_id) if mode == 'edit' else url_for('add') }}">
+
+  <fieldset>
+    <legend>About you</legend>
+    <div class="grid-2">
+      <div class="field">
+        <label for="age_group">Age group</label>
+        <select id="age_group" name="age_group" required>
+          <option value="">Choose…</option>
+          {% for a in age_groups %}<option {% if entry.age_group == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" required>
+          <option value="">Choose…</option>
+          {% for gd in genders %}<option {% if entry.gender == gd %}selected{% endif %}>{{ gd }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="hours_per_day">Hours on TikTok per day</label>
+        <input id="hours_per_day" name="hours_per_day" type="number" min="0" max="24" step="0.5"
+               inputmode="decimal" value="{{ entry.hours_per_day or '' }}" required aria-describedby="hours-hint">
+        <p class="hint" id="hours-hint">Roughly. Check your phone's screen time if you're not sure.</p>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>About the purchase</legend>
+    <div class="grid-2">
+      <div class="field">
+        <label for="product">What did you buy?</label>
+        <input id="product" name="product" type="text" maxlength="60" value="{{ entry.product or '' }}"
+               placeholder="e.g. Lip oil" required>
+      </div>
+      <div class="field">
+        <label for="category">Category</label>
+        <select id="category" name="category" required>
+          <option value="">Choose…</option>
+          {% for c in categories %}<option {% if entry.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="amount_eur">Amount spent (€)</label>
+        <input id="amount_eur" name="amount_eur" type="number" min="0" step="0.01"
+               inputmode="decimal" value="{{ entry.amount_eur or '' }}" placeholder="14.99" required>
+      </div>
+      <div class="field">
+        <label for="purchase_date">Date bought</label>
+        <input id="purchase_date" name="purchase_date" type="date" max="{{ today }}"
+               value="{{ entry.purchase_date or '' }}" required>
+      </div>
+      <div class="field">
+        <label for="influence">What made you buy it?</label>
+        <select id="influence" name="influence" required>
+          <option value="">Choose…</option>
+          {% for i in influences %}<option {% if entry.influence == i %}selected{% endif %}>{{ i }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Would you have bought it if you'd never seen it on TikTok?</legend>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="would_have_bought" value="1" required
+        {% if entry.would_have_bought|string == "1" %}checked{% endif %}> Yes, I'd have bought it anyway</label>
+      <label class="choice"><input type="radio" name="would_have_bought" value="0"
+        {% if entry.would_have_bought|string == "0" %}checked{% endif %}> No, only because of TikTok</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>How much do you regret it? <span class="hint-inline">(1 = not at all, 5 = a lot)</span></legend>
+    <div class="choices rating">
+      {% for n in range(1, 6) %}
+        <label class="choice"><input type="radio" name="regret" value="{{ n }}" required
+          {% if entry.regret|string == n|string %}checked{% endif %}> {{ n }}</label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <div class="actions">
+    <button class="button" type="submit">{{ "Save changes" if mode == "edit" else "Add entry" }}</button>
+    <a class="button button-secondary" href="{{ url_for('browse') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

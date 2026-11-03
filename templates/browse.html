@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Browse data · TikTok Spending Tracker{% endblock %}
+{% block content %}
+<h1>Browse the data</h1>
+
+<form class="filters card" method="get" action="{{ url_for('browse') }}" aria-label="Filter entries">
+  <div class="field">
+    <label for="q">Search products</label>
+    <input id="q" name="q" type="search" value="{{ filters.q or '' }}" placeholder="e.g. lip oil">
+  </div>
+  <div class="field">
+    <label for="age_group">Age group</label>
+    <select id="age_group" name="age_group">
+      <option value="">All ages</option>
+      {% for a in age_groups %}<option {% if filters.age_group == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="category">Category</label>
+    <select id="category" name="category">
+      <option value="">All categories</option>
+      {% for c in categories %}<option {% if filters.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="influence">Influenced by</label>
+    <select id="influence" name="influence">
+      <option value="">Anything</option>
+      {% for i in influences %}<option {% if filters.influence == i %}selected{% endif %}>{{ i }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="sort">Sort by</label>
+    <select id="sort" name="sort">
+      {% for key, (label, _) in sort_options.items() %}
+        <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-buttons">
+    <button class="button" type="submit">Apply</button>
+    <a class="button button-secondary" href="{{ url_for('browse') }}">Clear</a>
+  </div>
+</form>
+
+<p class="result-count" role="status">
+  Showing <strong>{{ summary.n }}</strong> {{ "entry" if summary.n == 1 else "entries" }},
+  totalling <strong>{{ summary.total | euro }}</strong>.
+</p>
+
+{% if rows %}
+<div class="table-scroll" tabindex="0" role="region" aria-label="Entries table">
+  <table class="data-table">
+    <caption class="visually-hidden">Purchases influenced by TikTok, page {{ page }} of {{ pages }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Product</th><th scope="col">Category</th><th scope="col" class="num">Amount</th>
+        <th scope="col">Age</th><th scope="col">Influenced by</th><th scope="col">Without TikTok?</th>
+        <th scope="col" class="num">Regret</th><th scope="col">Date</th><th scope="col"><span class="visually-hidden">Actions</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td data-label="Product"><strong>{{ r.product }}</strong></td>
+        <td data-label="Category">{{ r.category }}</td>
+        <td data-label="Amount" class="num">{{ r.amount_eur | euro }}</td>
+        <td data-label="Age">{{ r.age_group }}</td>
+        <td data-label="Influenced by">{{ r.influence }}</td>
+        <td data-label="Without TikTok?">{{ "Would have bought" if r.would_have_bought else "Wouldn't have" }}</td>
+        <td data-label="Regret" class="num">{{ r.regret }}/5</td>
+        <td data-label="Date">{{ r.purchase_date }}</td>
+        <td class="row-actions">
+          <a href="{{ url_for('edit', purchase_id=r.purchase_id) }}">Edit<span class="visually-hidden"> {{ r.product }}</span></a>
+          <a class="danger" href="{{ url_for('delete', purchase_id=r.purchase_id) }}">Delete<span class="visually-hidden"> {{ r.product }}</span></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<nav class="pagination" aria-label="Pages">
+  {% if page > 1 %}<a class="button button-secondary" href="{{ url_for('browse', page=page-1, **filters) }}">← Previous</a>{% endif %}
+  <span>Page {{ page }} of {{ pages }}</span>
+  {% if page < pages %}<a class="button button-secondary" href="{{ url_for('browse', page=page+1, **filters) }}">Next →</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+  <p class="card">No entries match these filters. Try clearing some of them.</p>
+{% endif %}
+{% endblock %}

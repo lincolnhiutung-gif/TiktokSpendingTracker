@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Research · TikTok Spending Tracker{% endblock %}
+{% block content %}
+<h1>What the research says</h1>
+<p class="lead">Published survey results from a Dublin Business School study of how TikTok influencers affect
+  people buying wellness products. These figures are stored in the database and drawn by Matplotlib.</p>
+
+<div class="research-list">
+  {% for q in questions %}
+    {% set rows = answers[q.question_id] %}
+    <section class="card research-question" aria-labelledby="q{{ q.question_id }}">
+      <h2 id="q{{ q.question_id }}">
+        {% if q.question_no != "?" %}<span class="q-no">Q{{ q.question_no }}</span>{% endif %}
+        {{ q.question }}
+      </h2>
+      <p class="muted">
+        {% if q.responses %}{{ q.responses }} responses. {% endif %}{{ q.note }}
+      </p>
+
+      {% if rows | length == 1 and q.question_id not in images %}
+        <p class="big-figure"><strong>{{ "%.1f" | format(rows[0].percent) }}%</strong> answered “{{ rows[0].option }}”.</p>
+      {% else %}
+        <figure class="chart">
+          {% if q.question_id in images %}
+            <img class="source-shot" src="{{ url_for('static', filename=images[q.question_id]) }}" loading="lazy"
+                 alt="Screenshot of the source's bar chart for: {{ q.question }}. Exact figures are in the table below.">
+          {% endif %}
+          <figcaption>
+            {% set top = rows | sort(attribute='percent', reverse=true) | first %}
+            The most common answer was <strong>“{{ top.option }}”</strong> ({{ "%.1f" | format(top.percent) }}%).
+            <details><summary>Show the numbers</summary>
+              <table class="mini-table">
+                <thead><tr><th scope="col">Answer</th><th scope="col" class="num">People</th><th scope="col" class="num">%</th></tr></thead>
+                <tbody>
+                  {% for r in rows %}
+                    <tr><td>{{ r.option }}</td><td class="num">{{ r.count if r.count is not none else "–" }}</td>
+                        <td class="num">{{ "%.1f" | format(r.percent) }}%</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </details>
+          </figcaption>
+        </figure>
+      {% endif %}
+    </section>
+  {% endfor %}
+</div>
+
+<p class="muted source-note">Charts are screenshots from the source study. Labels ending in “…” were cut short in the original charts.
+  Source: <a href="https://esource.dbs.ie/server/api/core/bitstreams/f845d8f0-73eb-49c6-9a6e-e63bbec971c5/content" target="_blank" rel="noopener">Dublin Business School eSource repository</a>.</p>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Charts · TikTok Spending Tracker{% endblock %}
+{% block content %}
+<h1>Charts</h1>
+<p class="lead">Each chart is drawn by Python (Matplotlib) straight from the database. Open “Show the numbers” under a chart to read the same data as a table.</p>
+
+<form class="filters card filters-inline" method="get" action="{{ url_for('chart_page') }}">
+  <div class="field">
+    <label for="age_group">Show results for</label>
+    <select id="age_group" name="age_group">
+      <option value="">All age groups</option>
+      {% for a in age_groups %}<option {% if age_group == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="filter-buttons"><button class="button" type="submit">Update charts</button></div>
+</form>
+
+{% set q = {'age_group': age_group} if age_group else {} %}
+<div class="chart-grid">
+  <figure class="card chart">
+    <img src="{{ url_for('chart_image', name='category', **q) }}" width="770" height="462"
+         alt="Bar chart of total money spent in each product category. Exact figures are in the table below.">
+    <figcaption>
+      {% if tables.category %}<strong>{{ tables.category[0].label }}</strong> is where the most money went.{% endif %}
+      <details><summary>Show the numbers</summary>
+        <table class="mini-table"><thead><tr><th scope="col">Category</th><th scope="col" class="num">Purchases</th><th scope="col" class="num">Total</th></tr></thead>
+          <tbody>{% for r in tables.category %}<tr><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td class="num">{{ r.value | euro }}</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </figcaption>
+  </figure>
+
+  <figure class="card chart">
+    <img src="{{ url_for('chart_image', name='anyway', **q) }}" width="770" height="462"
+         alt="Bar chart comparing purchases people would have made anyway with purchases made only because of TikTok.">
+    <figcaption>
+      {% set total = tables.anyway.yes + tables.anyway.no %}
+      {% if total %}<strong>{{ "%.0f" | format(tables.anyway.no / total * 100) }}%</strong> of purchases only happened because of TikTok.{% endif %}
+      <details><summary>Show the numbers</summary>
+        <table class="mini-table"><tbody>
+          <tr><th scope="row">Would have bought anyway</th><td class="num">{{ tables.anyway.yes }}</td></tr>
+          <tr><th scope="row">Only because of TikTok</th><td class="num">{{ tables.anyway.no }}</td></tr>
+        </tbody></table>
+      </details>
+    </figcaption>
+  </figure>
+
+  <figure class="card chart">
+    <img src="{{ url_for('chart_image', name='influence', **q) }}" width="770" height="462"
+         alt="Bar chart of how many purchases each type of TikTok content led to.">
+    <figcaption>
+      {% if tables.influence %}<strong>{{ tables.influence[0].label }}</strong> led to the most purchases.{% endif %}
+      <details><summary>Show the numbers</summary>
+        <table class="mini-table"><thead><tr><th scope="col">Influenced by</th><th scope="col" class="num">Purchases</th></tr></thead>
+          <tbody>{% for r in tables.influence %}<tr><td>{{ r.label }}</td><td class="num">{{ r.value }}</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </figcaption>
+  </figure>
+
+  <figure class="card chart">
+    <img src="{{ url_for('chart_image', name='regret', **q) }}" width="770" height="462"
+         alt="Bar chart of how many purchases got each regret rating from 1 (none) to 5 (a lot).">
+    <figcaption>
+      How people rated their regret, from 1 (none) to 5 (a lot).
+      <details><summary>Show the numbers</summary>
+        <table class="mini-table"><thead><tr><th scope="col">Regret</th><th scope="col" class="num">Purchases</th></tr></thead>
+          <tbody>{% for r in tables.regret %}<tr><td>{{ r.label }}/5</td><td class="num">{{ r.value }}</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </figcaption>
+  </figure>
+
+  <figure class="card chart chart-wide">
+    <img src="{{ url_for('chart_image', name='age') }}" width="770" height="462"
+         alt="Bar chart of the average amount spent per purchase in each age group.">
+    <figcaption>
+      Average spend per purchase for every age group (this chart always shows all ages so they can be compared).
+      <details><summary>Show the numbers</summary>
+        <table class="mini-table"><thead><tr><th scope="col">Age group</th><th scope="col" class="num">Purchases</th><th scope="col" class="num">Average</th></tr></thead>
+          <tbody>{% for r in tables.age %}<tr><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td class="num">{{ r.value | euro }}</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </figcaption>
+  </figure>
+</div>
+{% endblock %}

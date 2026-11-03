@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>TikTok Spending Tracker</h1>
+  <div class="actions">
+    <a class="button" href="{{ url_for('add') }}">Add your purchase</a>
+    <a class="button button-secondary" href="{{ url_for('chart_page') }}">See the charts</a>
+  </div>
+</section>
+
+{% if findings %}
+<section aria-labelledby="research-heading">
+  <h2 id="research-heading">What the research found</h2>
+  <ul class="stats">
+    {% for f in findings %}
+      <li class="stat"><span class="stat-value">{{ "%.1f" | format(f.percent) }}%</span>
+        <span class="stat-label">{{ f.question }} <strong>{{ f.option }}</strong></span></li>
+    {% endfor %}
+  </ul>
+  <p><a href="{{ url_for('research') }}">See all the research results →</a></p>
+</section>
+{% endif %}
+
+<section aria-labelledby="stats-heading">
+  <h2 id="stats-heading">Our tracker so far</h2>
+  <ul class="stats">
+    <li class="stat"><span class="stat-value">{{ stats.entries }}</span><span class="stat-label">purchases recorded</span></li>
+    <li class="stat"><span class="stat-value">{{ stats.total | euro }}</span><span class="stat-label">spent in total</span></li>
+    <li class="stat"><span class="stat-value">{{ stats.average | euro }}</span><span class="stat-label">average per purchase</span></li>
+    <li class="stat"><span class="stat-value">{{ "%.0f" | format(stats.impulse * 100) }}%</span><span class="stat-label">wouldn't have bought it without TikTok</span></li>
+    <li class="stat"><span class="stat-value">{{ "%.1f" | format(stats.regret) }} / 5</span><span class="stat-label">average regret</span></li>
+    <li class="stat"><span class="stat-value stat-text">{{ top_category.name if top_category else "–" }}</span><span class="stat-label">biggest spending category</span></li>
+  </ul>
+</section>
+
+<section aria-labelledby="recent-heading">
+  <h2 id="recent-heading">Latest entries</h2>
+  {% if recent %}
+    <ul class="recent">
+      {% for r in recent %}
+        <li><span><strong>{{ r.product }}</strong> <span class="muted">· {{ r.category }}</span></span>
+            <span class="amount">{{ r.amount_eur | euro }}</span></li>
+      {% endfor %}
+    </ul>
+    <p><a href="{{ url_for('browse') }}">Browse all entries →</a></p>
+  {% else %}
+    <p>No entries yet. <a href="{{ url_for('add') }}">Add the first one.</a></p>
+  {% endif %}
+</section>
+{% endblock %}
